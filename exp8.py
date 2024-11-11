@@ -1,7 +1,7 @@
 from bokeh.plotting import figure, output_file, show
 from bokeh.models import Legend, LegendItem, Title , Span
 
-output_file("line_graph_with_annotations.png")
+output_file("line_graph_with_annotations.html")
 
 x = [1,2,3,4,5]
 y1 = [2,5,7,2,8]
