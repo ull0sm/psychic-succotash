@@ -13,9 +13,9 @@ typedef struct
 
 Stack s;
 
-void initailize()
+void initialize()
 {
-    s.top = -1;
+    s.top = -1; 
 }
 
 int isFull()
@@ -33,10 +33,11 @@ void push(int value)
     if (isFull())
     {
         printf("stack overflow");
-        exit(0);
+        return;
     }
     s.data[++(s.top)] = value;
 }
+
 int pop()
 {
     if (isEmpty())
@@ -91,5 +92,21 @@ int evaluatepostfix(char *expression)
             }
             push(res);
         }
+        i++;
     }
+    return pop();
+}
+
+int main(){
+    char expression[max];
+
+    printf("enter the expression:");
+    scanf("%s",expression);
+
+    initialize();
+    int res = evaluatepostfix(expression);
+
+    printf("the answer for your expression: %s is %d",expression , res);
+
+    return 0;
 }
