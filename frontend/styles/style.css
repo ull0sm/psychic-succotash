@@ -1,0 +1,39 @@
+/* Global styles for Quiz App */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f7f9fc;
+    color: #333;
+  }
+  
+  .container {
+    max-width: 960px;
+    margin: auto;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px -3px rgba(0,0,0,0.1);
+  }
+  
+  h1, h2, h3 {
+    color: #1a1a1a;
+  }
+  
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-weight: 600;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive media queries and other styles can be added here */  

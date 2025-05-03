@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Application - Welcome</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+  body, html {
+    margin: 0; padding: 0; height: 100%; width: 100%; 
+    font-family: 'Poppins', sans-serif; background: #282c34; 
+    display: flex; justify-content: center; align-items: center;
+    color: white;
+  }
+  .loader {
+    font-size: 2rem;
+    animation: fadeInOut 2s infinite;
+  }
+  @keyframes fadeInOut {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+</style>
+<script>
+  window.onload = () => {
+    setTimeout(() => {
+      window.location.href = './dashboard.html';
+    }, 2000);
+  };
+</script>
+</head>
+<body>
+  <div class="loader">Welcome to the Quiz App</div>
+</body>
+</html>
