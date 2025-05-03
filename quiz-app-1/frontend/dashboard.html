@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"  />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dashboard - Quiz App</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body, html {
+    margin: 0; padding: 0; 
+    font-family: 'Poppins', sans-serif;
+    background: #f7f9fc;
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+  }
+  .sidebar {
+    width: 260px;
+    background: #007bff;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .sidebar h2 {
+    margin: 0 0 20px 0;
+    font-weight: 700;
+  }
+  .sidebar button {
+    margin-top: auto;
+    padding: 10px;
+    font-weight: 600;
+    background: #0056b3;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .sidebar button:hover {
+    background: #003f7f;
+  }
+  .content {
+    flex-grow: 1;
+    padding: 25px;
+    overflow-y: auto;
+  }
+  h3 {
+    color: #333;
+  }
+  .top-scorers {
+    margin-bottom: 25px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  th {
+    background: #efefef;
+  }
+  .filter-group {
+    margin-bottom: 15px;
+  }
+  select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 200px;
+  }
+  .quiz-subjects button {
+    margin: 10px 15px 15px 0;
+    padding: 10px 20px;
+    border: none;
+    background: #28a745;
+    color: white;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .quiz-subjects button:hover {
+    background: #19692c;
+  }
+
+  /* Responsive */
+  @media(max-width: 768px){
+    body, html {
+      flex-direction: column;
+      height: auto;
+    }
+    .sidebar{
+      width: 100%;
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 10px 5px;
+    }
+    .sidebar h2 {
+      flex: 1;
+      margin: 0 15px 0 10px;
+      white-space: nowrap;
+    }
+    .sidebar button{
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+    .content{
+      padding: 10px 15px;
+      height: auto;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2 id="welcome-text">Welcome,</h2>
+    <button id="logout-btn">Logout</button>
+  </div>
+  <div class="content">
+    <div id="teacher-dashboard" style="display:none;">
+      <h3>Student List</h3>
+      <div class="filter-group">
+        <label for="subject-filter">Filter by Subject:</label>
+        <select id="subject-filter">
+          <option value="">All Subjects</option>
+          <option value="DBMS">DBMS</option>
+          <option value="Java">Java</option>
+          <option value="DSA in C">DSA in C</option>
+          <option value="Operating Systems">Operating Systems</option>
+        </select>
+      </div>
+      <table id="students-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Subject Assigned</th>
+            <th>Biodata</th>
+            <th>View Scores</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- dynamically populated -->
+        </tbody>
+      </table>
+      <div id="scores-modal" style="display:none; padding: 10px; margin-top: 20px; background: #f1f1f1; border-radius: 5px;">
+        <h4>Student Scores</h4>
+        <table id="scores-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Score</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- dynamically populated -->
+          </tbody>
+        </table>
+        <button id="close-scores-btn" style="margin-top:10px; padding:6px 12px;">Close</button>
+      </div>
+      <h3>Analytics - Average Score per Subject</h3>
+      <table id="analytics-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Average Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <div id="student-dashboard" style="display:none;">
+      <h3>Top Scorers Leaderboard</h3>
+      <table id="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Subject</th>
+            <th>Top Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- dynamically populated -->
+        </tbody>
+      </table>
+
+      <h3>Choose a Quiz Subject</h3>
+      <div class="quiz-subjects">
+        <button data-subject="DBMS">DBMS</button>
+        <button data-subject="Java">Java</button>
+        <button data-subject="DSA in C">DSA in C</button>
+        <button data-subject="Operating Systems">Operating Systems</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchJson(url, options={}) {
+      try {
+        const res = await fetch(url, {...options, credentials: 'include'});
+        if(!res.ok) throw await res.json();
+        return await res.json();
+      } catch(e) {
+        alert((e && e.message) || 'Error occurred');
+        throw e;
+      }
+    }
+
+    const welcomeText = document.getElementById('welcome-text');
+    const logoutBtn = document.getElementById('logout-btn');
+    const teacherDashboard = document.getElementById('teacher-dashboard');
+    const studentDashboard = document.getElementById('student-dashboard');
+    const studentsTableBody = document.querySelector('#students-table tbody');
+    const scoresModal = document.getElementById('scores-modal');
+    const scoresTableBody = document.querySelector('#scores-table tbody');
+    const closeScoresBtn = document.getElementById('close-scores-btn');
+    const analyticsTableBody = document.querySelector('#analytics-table tbody');
+    const leaderboardTableBody = document.querySelector('#leaderboard-table tbody');
+    const subjectFilter = document.getElementById('subject-filter');
+    const quizButtons = document.querySelectorAll('.quiz-subjects button');
+
+    let currentRole = null;
+
+    async function checkSession() {
+      try {
+        // Try to fetch user role indirectly via leaderboard or student list (depends on role)
+        // Or login API might be added to fetch session info but since we have none,
+        // we rely on backend returning auth errors.
+        // Here, simplest method: fetch leaderboard - allowed for both roles anyway
+        const leaderboard = await fetchJson('http://localhost:5000/api/leaderboard');
+        currentRole = null;
+        try {
+          // try teacher-only api to detect role
+          const students = await fetchJson('http://localhost:5000/api/students');
+          currentRole = 'teacher';
+          showTeacherDashboard();
+        } catch {
+          currentRole = 'student';
+          showStudentDashboard();
+        }
+        welcomeText.textContent = 'Welcome, User';
+      } catch {
+        window.location.href = './login.html';
+      }
+    }
+
+    function showTeacherDashboard(){
+      teacherDashboard.style.display = 'block';
+      studentDashboard.style.display = 'none';
+      loadStudents();
+      loadAnalytics();
+    }
+
+    function showStudentDashboard(){
+      studentDashboard.style.display = 'block';
+      teacherDashboard.style.display = 'none';
+      loadLeaderboard();
+    }
+
+    async function loadStudents(subject=''){
+      studentsTableBody.innerHTML = '';
+      let url = 'http://localhost:5000/api/students';
+      if(subject) url += `?subject=${encodeURIComponent(subject)}`;
+      const students = await fetchJson(url);
+      if(students && students.length > 0){
+        students.forEach(st => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${st.name}</td><td>${st.class || ''}</td><td>${st.subject_assigned || ''}</td><td>${st.biodata || ''}</td>
+            <td><button class="view-scores-btn" data-id="${st.student_id}">View Scores</button></td>
+          `;
+          studentsTableBody.appendChild(tr);
+        });
+        document.querySelectorAll('.view-scores-btn').forEach(btn =>
+          btn.addEventListener('click', e => {
+            const studentId = e.target.getAttribute('data-id');
+            loadStudentScores(studentId);
+          })
+        );
+      }else{
+        studentsTableBody.innerHTML = '<tr><td colspan="5">No students found</td></tr>';
+      }
+    }
+
+    async function loadStudentScores(studentId){
+      scoresTableBody.innerHTML = '';
+      const scores = await fetchJson(`http://localhost:5000/api/student_scores/${studentId}`);
+      if(scores && scores.length > 0){
+        scores.forEach(sc => {
+          const tr = document.createElement('tr');
+          const date = new Date(sc.attempted_on).toLocaleString();
+          tr.innerHTML = `<td>${sc.subject}</td><td>${sc.score}</td><td>${date}</td>`;
+          scoresTableBody.appendChild(tr);
+        });
+      } else {
+        scoresTableBody.innerHTML = '<tr><td colspan="3">No scores found</td></tr>';
+      }
+      scoresModal.style.display = 'block';
+    }
+
+    closeScoresBtn.onclick = () => {
+      scoresModal.style.display = 'none';
+      scoresTableBody.innerHTML = '';
+    };
+
+    subjectFilter.onchange = () => {
+      loadStudents(subjectFilter.value);
+    };
+
+    async function loadAnalytics(){
+      analyticsTableBody.innerHTML = '';
+      const analytics = await fetchJson('http://localhost:5000/api/analytics/average_scores');
+      if(analytics && analytics.length>0){
+        analytics.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.subject}</td><td>${parseFloat(item.average_score).toFixed(2)}</td>`;
+          analyticsTableBody.appendChild(tr);
+        });
+      } else {
+        analyticsTableBody.innerHTML = '<tr><td colspan="2">No analytics data</td></tr>';
+      }
+    }
+
+    async function loadLeaderboard(){
+      leaderboardTableBody.innerHTML = '';
+      const leaderboard = await fetchJson('http://localhost:5000/api/leaderboard');
+      if(leaderboard && leaderboard.length > 0){
+        leaderboard.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.name}</td><td>${item.subject}</td><td>${item.top_score}</td>`;
+          leaderboardTableBody.appendChild(tr);
+        });
+      } else {
+        leaderboardTableBody.innerHTML = '<tr><td colspan="3">No leaderboard data</td></tr>';
+      }
+    }
+
+    logoutBtn.onclick = async () => {
+      try {
+        await fetchJson('http://localhost:5000/api/logout', { method: 'POST' });
+        window.location.href = 'login.html';
+      } catch {
+        alert('Logout failed');
+      }
+    };
+
+    quizButtons.forEach(btn => {
+      btn.onclick = () => {
+        const subject = btn.getAttribute('data-subject');
+        window.location.href = `quiz.html?subject=${encodeURIComponent(subject)}`;
+      };
+    });
+
+    // On page load
+    checkSession();
+
+  </script>
+</body>
+</html>

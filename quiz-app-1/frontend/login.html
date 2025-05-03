@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"  />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz Result - Quiz App</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+  body, html {
+    margin: 0; padding: 0; 
+    font-family: 'Poppins', sans-serif;
+    background: #282c34;
+    color: white;
+    height: 100vh;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .result-box {
+    background: #20232a;
+    padding: 30px 40px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 350px;
+    width: 90vw;
+  }
+  h1 {
+    margin: 0 0 20px 0;
+  }
+  .score {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #61dafb;
+  }
+  button {
+    background: #61dafb;
+    border: none;
+    border-radius: 7px;
+    padding: 12px 20px;
+    font-weight: 700;
+    color: #20232a;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #21a1f1;
+  }
+</style>
+</head>
+<body>
+  <div class="result-box">
+    <h1>Quiz Completed!</h1>
+    <div class="score" id="score-display">Your Score: 0 / 10</div>
+    <button id="dashboard-btn">Back to Dashboard</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const score = urlParams.get('score') || 0;
+
+    document.getElementById('score-display').textContent = `Your Score: ${score} / 10`;
+
+    document.getElementById('dashboard-btn').onclick = () => {
+      window.location.href = './dashboard.html';
+    };
+  </script>
+</body>
+</html>
