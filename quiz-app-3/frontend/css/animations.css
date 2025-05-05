@@ -1,0 +1,17 @@
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #282c34;
+    color: white;
+}
+.welcome-text {
+    font-size: 2.5rem;
+    animation: fadeInOut 2s;
+}
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
