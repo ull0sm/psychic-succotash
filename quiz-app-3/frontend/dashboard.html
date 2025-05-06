@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Quiz Application Dashboard</h1>
+        <div class="role-selection">
+            <button onclick="navigateTo('student-dashboard.html')">I'm a Student</button>
+            <button onclick="navigateTo('teacher-dashboard.html')">I'm a Teacher</button>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+    </script>
+</body>
+</html>

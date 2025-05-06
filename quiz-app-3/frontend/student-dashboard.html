@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="student-dashboard-container">
+        <h1>Available Quizzes</h1>
+        <ul>
+            <li><button onclick="startQuiz('DBMS')">DBMS</button></li>
+            <li><button onclick="startQuiz('Java')">Java</button></li>
+            <li><button onclick="startQuiz('DSA in C')">DSA in C</button></li>
+            <li><button onclick="startQuiz('OS')">OS</button></li>
+        </ul>
+    </div>
+
+    <script>
+        function startQuiz(subject) {
+            sessionStorage.setItem('selectedQuiz', subject);
+            window.location.href = "quiz.html";
+        }
+    </script>
+</body>
+</html>
