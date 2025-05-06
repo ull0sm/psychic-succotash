@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"  />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz - Quiz App</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  body, html {
+    margin: 0; padding: 0; height: 100vh;
+    font-family: 'Poppins', sans-serif;
+    background: #f7f9fc;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .quiz-container {
+    background: white;
+    width: 90vw;
+    max-width: 600px;
+    padding: 20px 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px -5px #00000050;
+  }
+  .question-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-size: 20px;
+    margin-bottom: 15px;
+    min-height: 60px;
+  }
+  .options {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .options li {
+    margin-bottom: 12px;
+  }
+  .option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    background: #e9ecef;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: background 0.3s ease, border 0.3s ease;
+    user-select: none;
+  }
+  .option-label:hover {
+    background: #dce4f0;
+  }
+  input[type=radio] {
+    margin-right: 12px;
+  }
+  button#next-btn {
+    margin-top: 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button#next-btn:disabled {
+    background: #a1c0ff;
+    cursor: default;
+  }
+  .timer-container {
+    margin-bottom: 15px;
+  }
+  .progress-bar {
+    background: #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+    height: 14px;
+    width: 100%;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: #007bff;
+    transition: width 1s linear;
+  }
+</style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="timer-container">
+      <div class="progress-bar" aria-label="Timer progress bar">
+        <div class="progress-bar-fill" id="progress-bar-fill" style="width: 100%;"></div>
+      </div>
+      <small id="timer-text" style="font-weight:600; color:#555;"></small>
+    </div>
+    <div class="question-number" id="question-number">Question 1 / 10</div>
+    <div class="question-text" id="question-text">Loading question...</div>
+    <ul class="options" id="options-list">
+    </ul>
+    <button id="next-btn" disabled>Next</button>
+  </div>
+
+  <script>
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const timerText = document.getElementById('timer-text');
+    const questionNumberElem = document.getElementById('question-number');
+    const questionTextElem = document.getElementById('question-text');
+    const optionsList = document.getElementById('options-list');
+    const nextBtn = document.getElementById('next-btn');
+
+    const totalQuestions = 10;
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let selectedOption = null;
+    let timerInterval = null;
+    const maxTime = 10; // seconds
+    let timeLeft = maxTime;
+
+    // Parse subject from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const subject = urlParams.get('subject');
+    if(!subject) {
+      alert('Quiz subject not specified');
+      window.location.href = './dashboard.html';
+    }
+
+    async function fetchQuestions() {
+      try {
+        const res = await fetch(`http://localhost:5000/api/questions/${encodeURIComponent(subject)}`, {credentials: 'include'});
+        if(!res.ok) throw new Error('Failed to load questions');
+        questions = await res.json();
+        if(questions.length < totalQuestions){
+          alert('Not enough questions available for this subject.');
+          window.location.href = './dashboard.html';
+        } else {
+          loadQuestion();
+          resetTimer();
+          startTimer();
+        }
+      } catch(e) {
+        alert('Error fetching questions. Please login or try again later.');
+        window.location.href = './login.html';
+      }
+    }
+
+    function loadQuestion(){
+      const q = questions[currentQuestionIndex];
+      questionNumberElem.textContent = `Question ${currentQuestionIndex + 1} / ${totalQuestions}`;
+      questionTextElem.textContent = q.question_text;
+      optionsList.innerHTML = '';
+
+      ['a','b','c','d'].forEach((optChar) => {
+        const optionText = q['option_' + optChar];
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <label class="option-label">
+            <input type="radio" name="option" value="${optChar}" />
+            ${optionText}
+          </label>
+        `;
+        optionsList.appendChild(li);
+      });
+
+      selectedOption = null;
+      nextBtn.disabled = true;
+
+      optionsList.querySelectorAll('input[type=radio]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          selectedOption = radio.value;
+          nextBtn.disabled = false;
+        });
+      });
+    }
+
+    function resetTimer(){
+      clearInterval(timerInterval);
+      timeLeft = maxTime;
+      updateTimer();
+    }
+
+    function updateTimer(){
+      timerText.textContent = `Time left: ${timeLeft}s`;
+      progressBarFill.style.width = (timeLeft / maxTime) * 100 + '%';
+    }
+
+    function startTimer(){
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if(timeLeft <= 0){
+          clearInterval(timerInterval);
+          nextBtn.click();
+        }
+      }, 1000);
+    }
+
+    let score = 0;
+
+    nextBtn.onclick = () => {
+      clearInterval(timerInterval);
+      const currentQ = questions[currentQuestionIndex];
+      if(selectedOption && selectedOption === currentQ.correct_option){
+        score++;
+      }
+      currentQuestionIndex++;
+
+      if(currentQuestionIndex >= totalQuestions){
+        submitScore();
+      } else {
+        loadQuestion();
+        resetTimer();
+        startTimer();
+      }
+    };
+
+    async function submitScore(){
+      try {
+        const res = await fetch('http://localhost:5000/api/submit_score', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'include',
+          body: JSON.stringify({
+            subject: subject,
+            score: score
+          })
+        });
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.message || 'Failed to submit score');
+        window.location.href = `result.html?score=${score}&subject=${encodeURIComponent(subject)}`;
+      } catch (e) {
+        alert('Failed to submit score: ' + e.message);
+        window.location.href = './dashboard.html';
+      }
+    }
+
+    fetchQuestions();
+
+  </script>
+</body>
+</html>
